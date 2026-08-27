@@ -6,7 +6,7 @@
 
 @page {
   size: A4;
-  margin: 10mm;
+  margin: 0;
 }
 
 @media print {
@@ -33,6 +33,7 @@
     box-shadow: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
+    padding: 12mm 10mm !important;
   }
   .print\:hidden {
     display: none !important;
