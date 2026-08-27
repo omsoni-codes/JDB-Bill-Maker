@@ -6,18 +6,18 @@ import { Textarea } from "./ui/textarea";
 function Section({ title, children }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
-      <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-        <h3 className="font-semibold text-slate-800 text-sm tracking-wide uppercase">{title}</h3>
+      <div className="px-5 py-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+        <h3 className="font-semibold text-slate-800 text-xs tracking-[0.15em] uppercase">{title}</h3>
       </div>
-      <div className="p-4 space-y-3">{children}</div>
+      <div className="p-5 space-y-4">{children}</div>
     </div>
   );
 }
 
 function Field({ label, children }) {
   return (
-    <div className="space-y-1">
-      <Label className="text-xs text-slate-600">{label}</Label>
+    <div className="space-y-1.5">
+      <Label className="text-[11px] font-medium text-slate-600 uppercase tracking-wide">{label}</Label>
       {children}
     </div>
   );
