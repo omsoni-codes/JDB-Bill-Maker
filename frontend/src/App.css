@@ -1,0 +1,11 @@
+.App {
+  text-align: left;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Noto+Serif+Devanagari:wght@600&display=swap');
+
+@media print {
+  body { background: white !important; }
+  .print\:hidden { display: none !important; }
+  #bill-preview { box-shadow: none !important; }
+}
