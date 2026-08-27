@@ -11,7 +11,8 @@ export default function BillMaker() {
 
   const totals = useMemo(() => {
     const total = Number(data.amounts.totalBillAmount) || 0;
-    const paid = Number(data.amounts.amountPaid) || 0;
+    const payments = Array.isArray(data.amounts.payments) ? data.amounts.payments : [];
+    const paid = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
     const balance = Math.max(total - paid, 0);
     return { total, paid, balance };
   }, [data]);

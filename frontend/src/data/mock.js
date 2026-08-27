@@ -24,7 +24,7 @@ export const defaultData = {
   },
   amounts: {
     totalBillAmount: 0,
-    amountPaid: 0,
+    payments: [],
   },
   bank: {
     holder: "",
@@ -43,3 +43,5 @@ export const defaultData = {
 
 export const LOGO_URL = "https://jdb-bill.lovable.app/assets/jdb-logo-BPYw3CAV.png";
 export const SEAL_URL = "/assets/jdb-seal.png";
+export const SIGNATURE_URL = "/assets/jdb-signature.png";
+export const QR_URL = "/assets/jdb-qr.png";

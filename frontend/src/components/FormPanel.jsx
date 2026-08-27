@@ -2,6 +2,8 @@ import React from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { Plus, Trash2 } from "lucide-react";
 
 function Section({ title, children }) {
   return (
@@ -100,15 +102,114 @@ export default function FormPanel({ data, setData }) {
         </Field>
       </Section>
 
-      <Section title="Payment Summary">
-        <div className="grid grid-cols-1 gap-3">
+      <Section title="Payments Received">
+        <div className="space-y-2">
           <Field label="Total Bill Amount (₹)">
-            <Input type="number" min="0" value={data.amounts.totalBillAmount} onChange={(e) => update("amounts", "totalBillAmount", parseFloat(e.target.value) || 0)} />
+            <Input
+              type="number"
+              min="0"
+              value={data.amounts.totalBillAmount}
+              onChange={(e) => update("amounts", "totalBillAmount", parseFloat(e.target.value) || 0)}
+            />
           </Field>
-          <Field label="Amount Paid (₹)">
-            <Input type="number" min="0" value={data.amounts.amountPaid} onChange={(e) => update("amounts", "amountPaid", parseFloat(e.target.value) || 0)} />
-          </Field>
-          <div className="text-xs text-slate-500">Balance Due auto-calculated as Total Bill − Amount Paid.</div>
+        </div>
+
+        <div className="border-t border-slate-200 pt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-[11px] font-medium text-slate-600 uppercase tracking-wide">
+              Payments (Part 1, Part 2, Advance…)
+            </Label>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const list = Array.isArray(data.amounts.payments) ? data.amounts.payments : [];
+                const nextNum = list.length + 1;
+                const today = new Date().toISOString().slice(0, 10);
+                const item = {
+                  id: `p_${Date.now()}`,
+                  label: `Part ${nextNum}`,
+                  date: today,
+                  amount: 0,
+                };
+                update("amounts", "payments", [...list, item]);
+              }}
+              className="h-7 px-2 text-xs"
+            >
+              <Plus className="w-3 h-3 mr-1" /> Add payment
+            </Button>
+          </div>
+
+          {(!data.amounts.payments || data.amounts.payments.length === 0) && (
+            <div className="text-xs text-slate-500 italic py-2">
+              No payments yet. Click "Add payment" to record Part 1, Part 2, or an advance.
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {(data.amounts.payments || []).map((p, idx) => (
+              <div
+                key={p.id}
+                className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end p-2 rounded-lg bg-slate-50 border border-slate-200"
+              >
+                <div className="space-y-1">
+                  <div className="text-[10px] text-slate-500 uppercase">Label</div>
+                  <Input
+                    value={p.label}
+                    onChange={(e) => {
+                      const list = [...data.amounts.payments];
+                      list[idx] = { ...p, label: e.target.value };
+                      update("amounts", "payments", list);
+                    }}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-[10px] text-slate-500 uppercase">Date</div>
+                  <Input
+                    type="date"
+                    value={p.date}
+                    onChange={(e) => {
+                      const list = [...data.amounts.payments];
+                      list[idx] = { ...p, date: e.target.value };
+                      update("amounts", "payments", list);
+                    }}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-[10px] text-slate-500 uppercase">Amount (₹)</div>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={p.amount}
+                    onChange={(e) => {
+                      const list = [...data.amounts.payments];
+                      list[idx] = { ...p, amount: parseFloat(e.target.value) || 0 };
+                      update("amounts", "payments", list);
+                    }}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = data.amounts.payments.filter((_, i) => i !== idx);
+                    update("amounts", "payments", list);
+                  }}
+                  className="h-8 w-8 flex items-center justify-center rounded text-slate-400 hover:text-rose-600 hover:bg-white transition-colors"
+                  aria-label="Remove payment"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-xs text-slate-500 pt-1">
+            Amount Paid and Balance Due are calculated automatically from the payments above.
+          </div>
         </div>
       </Section>
 

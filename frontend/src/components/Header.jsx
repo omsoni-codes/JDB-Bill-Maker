@@ -9,38 +9,78 @@ export default function Header({ totalBill, amountPaid, balance, onReset }) {
   const status = balance <= 0 && totalBill > 0 ? "PAID" : balance > 0 && amountPaid > 0 ? "PARTIAL" : "UNPAID";
   const statusColor = status === "PAID" ? "bg-emerald-600" : status === "PARTIAL" ? "bg-amber-500" : "bg-rose-600";
 
-  const downloadPdf = async () => {
+  const generateFittedPdf = async () => {
     const el = document.getElementById("bill-preview");
-    if (!el) return;
+    if (!el) return null;
     const canvas = await html2canvas(el, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: "#ffffff",
       logging: false,
+      letterRendering: true,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight,
     });
     const imgData = canvas.toDataURL("image/jpeg", 0.95);
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
-    const imgW = pageW;
-    const imgH = (canvas.height * imgW) / canvas.width;
 
-    if (imgH <= pageH) {
-      pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
+    const margin = 6;
+    const maxW = pageW - margin * 2;
+    const maxH = pageH - margin * 2;
+    const imgRatio = canvas.width / canvas.height;
+    const boxRatio = maxW / maxH;
+
+    let imgW, imgH;
+    if (imgRatio > boxRatio) {
+      imgW = maxW;
+      imgH = maxW / imgRatio;
     } else {
-      // multi-page
-      let position = 0;
-      let heightLeft = imgH;
-      while (heightLeft > 0) {
-        pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH);
-        heightLeft -= pageH;
-        if (heightLeft > 0) {
-          pdf.addPage();
-          position -= pageH;
-        }
-      }
+      imgH = maxH;
+      imgW = maxH * imgRatio;
     }
-    pdf.save("JDB-Bill.pdf");
+
+    const x = (pageW - imgW) / 2;
+    const y = (pageH - imgH) / 2;
+    pdf.addImage(imgData, "JPEG", x, y, imgW, imgH);
+    return pdf;
+  };
+
+  const downloadPdf = async () => {
+    const pdf = await generateFittedPdf();
+    if (pdf) pdf.save("JDB-Bill.pdf");
+  };
+
+  // Direct browser print — scales the bill to fit ONE A4 page, then calls window.print()
+  const printBill = () => {
+    const el = document.getElementById("bill-preview");
+    if (!el) return;
+
+    // A4 portrait usable area with 8mm margins: 210-16=194mm wide, 297-16=281mm tall
+    // Convert mm to px at 96dpi: 1mm = 3.7795px
+    const MM = 3.7795;
+    const maxHeightPx = 281 * MM;
+    const maxWidthPx = 194 * MM;
+
+    const rect = el.getBoundingClientRect();
+    const scaleH = maxHeightPx / rect.height;
+    const scaleW = maxWidthPx / rect.width;
+    const scale = Math.min(1, scaleH, scaleW);
+
+    el.setAttribute("data-print-scale", String(scale));
+    el.style.setProperty("--print-scale", String(scale));
+
+    // Trigger print
+    setTimeout(() => {
+      window.print();
+      // Cleanup after
+      setTimeout(() => {
+        el.style.removeProperty("--print-scale");
+        el.removeAttribute("data-print-scale");
+      }, 500);
+    }, 50);
   };
 
   return (
@@ -59,7 +99,7 @@ export default function Header({ totalBill, amountPaid, balance, onReset }) {
           <Button variant="outline" size="sm" onClick={onReset}>
             <RotateCcw className="w-4 h-4 mr-1.5" /> Reset
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Button variant="outline" size="sm" onClick={printBill}>
             <Printer className="w-4 h-4 mr-1.5" /> Print
           </Button>
           <Button size="sm" onClick={downloadPdf} className="bg-slate-900 hover:bg-slate-800">

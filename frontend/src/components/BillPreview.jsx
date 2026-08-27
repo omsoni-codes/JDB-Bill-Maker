@@ -1,5 +1,5 @@
 import React from "react";
-import { LOGO_URL, SEAL_URL } from "../data/mock";
+import { LOGO_URL, SEAL_URL, SIGNATURE_URL, QR_URL } from "../data/mock";
 import { numberToIndianWords } from "../utils/numberToWords";
 import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 
@@ -19,7 +19,8 @@ function fmtInr(n) {
 
 export default function BillPreview({ data }) {
   const total = Number(data.amounts.totalBillAmount) || 0;
-  const paid = Number(data.amounts.amountPaid) || 0;
+  const payments = Array.isArray(data.amounts.payments) ? data.amounts.payments : [];
+  const paid = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const balance = Math.max(total - paid, 0);
   const isPaid = balance <= 0 && total > 0;
   const isPartial = paid > 0 && balance > 0;
@@ -35,7 +36,7 @@ export default function BillPreview({ data }) {
       className="bg-white shadow-xl rounded-lg mx-auto max-w-[900px] overflow-hidden ring-1 ring-slate-200 print:shadow-none print:max-w-none print:ring-0 print:rounded-none"
     >
       {/* Letterhead */}
-      <div className="bg-gradient-to-b from-amber-100 to-amber-50 border-b-[6px] border-double border-amber-800 px-8 py-6">
+      <div className="bg-amber-50 border-b-[6px] border-double border-amber-800 px-8 py-6">
         <div
           className="text-center text-sm text-amber-900 font-semibold tracking-wide mb-3"
           style={{ fontFamily: "'Noto Serif Devanagari', serif" }}
@@ -84,12 +85,11 @@ export default function BillPreview({ data }) {
       </table>
 
       {/* BILL heading */}
-      <div className="relative flex items-center justify-center bg-gradient-to-r from-slate-900 to-slate-800 text-white px-6 py-3">
-        <div className="tracking-[0.6em] font-bold text-lg">B I L L</div>
-        <div
-          className={`absolute right-5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full text-[11px] font-bold ${statusColor} shadow-md`}
-        >
-          {statusLabel}
+      <div className="grid grid-cols-3 items-center bg-slate-900 text-white px-6 py-3">
+        <div />
+        <div className="tracking-[0.6em] font-bold text-lg text-center">B I L L</div>
+        <div className="flex justify-end">
+          <div className={`px-3 py-1 rounded-full text-[11px] font-bold ${statusColor} shadow-md`}>{statusLabel}</div>
         </div>
       </div>
 
@@ -139,35 +139,72 @@ export default function BillPreview({ data }) {
         </div>
       )}
 
+      {/* Payments Received table */}
+      {payments.length > 0 && (
+        <div className="px-6 pt-6">
+          <div className="mb-2">
+            <span className="inline-block bg-slate-900 text-white px-3 py-1 text-[10px] font-bold tracking-[0.15em] rounded leading-none">
+              PAYMENTS RECEIVED
+            </span>
+          </div>
+          <table className="w-full text-sm border border-slate-300 border-collapse">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 text-[11px] uppercase tracking-wide">
+                <th className="px-3 py-2 border border-slate-300 text-left w-10">#</th>
+                <th className="px-3 py-2 border border-slate-300 text-left">Description</th>
+                <th className="px-3 py-2 border border-slate-300 text-left w-32">Date</th>
+                <th className="px-3 py-2 border border-slate-300 text-right w-32">Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((p, i) => (
+                <tr key={p.id || i} className="text-slate-800">
+                  <td className="px-3 py-2 border border-slate-300">{i + 1}</td>
+                  <td className="px-3 py-2 border border-slate-300 font-medium">{p.label || `Part ${i + 1}`}</td>
+                  <td className="px-3 py-2 border border-slate-300">{formatDate(p.date)}</td>
+                  <td className="px-3 py-2 border border-slate-300 text-right font-semibold">{fmtInr(p.amount)}</td>
+                </tr>
+              ))}
+              <tr className="bg-emerald-50 font-bold">
+                <td colSpan={3} className="px-3 py-2 border border-slate-300 text-right text-slate-700">
+                  Total Received
+                </td>
+                <td className="px-3 py-2 border border-slate-300 text-right text-emerald-700">₹ {fmtInr(paid)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* Amount summary */}
       <div className="px-6 py-6">
         <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="grid grid-cols-3 divide-x divide-slate-200">
-            <div className="p-5 bg-gradient-to-br from-rose-50 to-white">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <div className="p-5 bg-rose-50">
+              <div className="flex items-center gap-2 flex-wrap leading-none">
+                <AlertCircle className="w-4 h-4 text-rose-600" />
                 <span className="text-[11px] text-slate-600 uppercase tracking-wider font-semibold">Total Bill</span>
-                <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200 leading-none whitespace-nowrap">
                   UNPAID
                 </span>
               </div>
               <div className="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">₹ {fmtInr(total)}</div>
             </div>
-            <div className="p-5 bg-gradient-to-br from-emerald-50 to-white">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <div className="p-5 bg-emerald-50">
+              <div className="flex items-center gap-2 flex-wrap leading-none">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span className="text-[11px] text-slate-600 uppercase tracking-wider font-semibold">Amount Paid</span>
-                <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 leading-none whitespace-nowrap">
                   PAID
                 </span>
               </div>
               <div className="mt-3 text-2xl font-extrabold text-emerald-700 tracking-tight">₹ {fmtInr(paid)}</div>
             </div>
-            <div className="p-5 bg-gradient-to-br from-amber-50 to-white">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="p-5 bg-amber-50">
+              <div className="flex items-center gap-2 flex-wrap leading-none">
+                <Clock className="w-4 h-4 text-amber-600" />
                 <span className="text-[11px] text-slate-600 uppercase tracking-wider font-semibold">Balance Due</span>
-                <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-200 text-amber-800 border border-amber-300">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-200 text-amber-800 border border-amber-300 leading-none whitespace-nowrap">
                   DUE
                 </span>
               </div>
@@ -185,39 +222,54 @@ export default function BillPreview({ data }) {
       {/* Bank + Notes */}
       <div className="grid grid-cols-2 border-t border-slate-200">
         <div className="px-6 py-4 border-r border-slate-200">
-          <div className="inline-block bg-slate-900 text-white px-3 py-1 text-[10px] font-bold tracking-[0.15em] rounded">
-            BANK DETAILS FOR PAYMENT
+          <div>
+            <span className="inline-block bg-slate-900 text-white px-3 py-1 text-[10px] font-bold tracking-[0.15em] rounded leading-none">
+              BANK DETAILS FOR PAYMENT
+            </span>
           </div>
-          <div className="mt-3 text-sm space-y-1 text-slate-800 leading-relaxed">
-            {data.bank.holder ? (
-              <>
-                <div>
-                  <span className="font-semibold text-slate-700">A/C Holder:</span> {data.bank.holder}
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-700">Bank:</span> {data.bank.bankName}
-                  {data.bank.branch && ` \u2014 ${data.bank.branch}`}
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-700">A/C No:</span> {data.bank.accountNumber}
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-700">IFSC:</span> {data.bank.ifsc}
-                </div>
-                {data.bank.upi && (
+          <div className="mt-3 grid grid-cols-[1fr_auto] gap-3 items-start">
+            <div className="text-sm space-y-1 text-slate-800 leading-relaxed">
+              {data.bank.holder ? (
+                <>
                   <div>
-                    <span className="font-semibold text-slate-700">UPI:</span> {data.bank.upi}
+                    <span className="font-semibold text-slate-700">A/C Holder:</span> {data.bank.holder}
                   </div>
-                )}
-              </>
-            ) : (
-              <div className="text-slate-500 text-xs italic">Add your bank / UPI details in the form.</div>
-            )}
+                  <div>
+                    <span className="font-semibold text-slate-700">Bank:</span> {data.bank.bankName}
+                    {data.bank.branch && ` — ${data.bank.branch}`}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">A/C No:</span> {data.bank.accountNumber}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">IFSC:</span> {data.bank.ifsc}
+                  </div>
+                  {data.bank.upi && (
+                    <div>
+                      <span className="font-semibold text-slate-700">UPI:</span> {data.bank.upi}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-slate-500 text-xs italic">Add your bank / UPI details in the form.</div>
+              )}
+              <div className="text-[10px] text-slate-500 pt-1 italic">Scan QR to pay via PhonePe / UPI</div>
+            </div>
+            <div className="flex flex-col items-center">
+              <img
+                src={QR_URL}
+                alt="Payment QR Code"
+                className="w-24 h-24 object-contain border border-slate-200 rounded p-1 bg-white"
+              />
+              <div className="text-[9px] font-semibold text-slate-600 mt-1 tracking-wide">SCAN & PAY</div>
+            </div>
           </div>
         </div>
         <div className="px-6 py-4">
-          <div className="inline-block bg-slate-900 text-white px-3 py-1 text-[10px] font-bold tracking-[0.15em] rounded">
-            TERMS & NOTES
+          <div>
+            <span className="inline-block bg-slate-900 text-white px-3 py-1 text-[10px] font-bold tracking-[0.15em] rounded leading-none">
+              TERMS & NOTES
+            </span>
           </div>
           <ul className="mt-3 list-disc pl-5 text-xs text-slate-700 space-y-1 leading-relaxed">
             {notesList.map((line, i) => (
@@ -235,12 +287,22 @@ export default function BillPreview({ data }) {
           </div>
         </div>
         <div className="relative flex flex-col justify-end">
-          <img
-            src={SEAL_URL}
-            alt="JDB Electricals Seal"
-            className="absolute -top-20 left-1/2 -translate-x-1/2 w-32 h-32 object-contain opacity-80 pointer-events-none select-none"
-            style={{ transform: "translateX(-50%) rotate(-10deg)" }}
-          />
+          <div className="absolute left-0 right-0 -top-24 flex justify-center pointer-events-none">
+            <img
+              src={SEAL_URL}
+              alt="JDB Electricals Seal"
+              className="w-32 h-32 object-contain opacity-70 select-none"
+              style={{ transform: "rotate(-10deg) translateX(-30px)" }}
+            />
+          </div>
+          <div className="absolute left-0 right-0 -top-20 flex justify-center pointer-events-none">
+            <img
+              src={SIGNATURE_URL}
+              alt="Signature"
+              className="h-24 object-contain select-none"
+              style={{ transform: "rotate(-4deg) translateX(30px)" }}
+            />
+          </div>
           <div className="border-t border-slate-400 pt-1.5 text-center">
             <div className="text-xs text-slate-700">Authorised Signatory</div>
             <div className="text-xs mt-1 text-slate-800">

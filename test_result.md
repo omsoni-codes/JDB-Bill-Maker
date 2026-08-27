@@ -101,3 +101,98 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Clone of https://jdb-bill.lovable.app bill maker with modifications:
+  - Removed items section, replaced with Total Bill / Amount Paid / Balance Due summary with icons
+  - Added seal image, letterhead logo alignment, centered BILL heading
+  - Save Drafts feature with auto bill number increment
+  - Download PDF feature using html2canvas + jsPDF
+  Bug reported: On downloaded PDF, "Bank Details", "Terms & Notes" section headers and the UNPAID/PAID/DUE badges in the amount cards appear misaligned compared to the on-screen preview.
+
+frontend:
+  - task: "PDF export alignment (Bank Details, Terms & Notes headers, and status badges)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/BillPreview.jsx, /app/frontend/src/components/Header.jsx"
+    stuck_count: 2
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User reported PDF alignment issues — BANK DETAILS / TERMS & NOTES pills and UNPAID/PAID/DUE badges misaligned in downloaded PDF vs on-screen preview."
+      - working: "NA"
+        agent: "main"
+        comment: "Second report from user with annotated screenshot: UNPAID/PAID/DUE badges were floating far to the right of the amount cards; BANK DETAILS FOR PAYMENT and TERMS & NOTES pills looked stretched. Root cause: html2canvas mis-computes CSS `ml-auto` and `justify-between` in flex layouts (badges drift to extreme right) and mis-renders `inline-block` widths on the tracked-letter-spacing pills."
+      - working: "NA"
+        agent: "main"
+        comment: "Third fix: Simplified amount card row to `flex items-center gap-2 flex-wrap leading-none` — icon, label, and badge now flow naturally with small gap; no ml-auto or justify-between. Added `whitespace-nowrap` on badges so tracking never wraps. Section pill labels wrapped in `<div>` block with pill as `<span className='inline-block'>` + leading-none for shrink-wrap width. Downloaded a real PDF via Playwright and rendered it via pdftoppm; visually confirmed on the rasterized PDF page: badges are adjacent to labels, pills are compact (~180px wide), everything fits on one A4 page, seal centered above signatory line."
+
+  - task: "Multi-part Payments (Part 1, Part 2, Advance)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/data/mock.js, /app/frontend/src/pages/BillMaker.jsx, /app/frontend/src/components/FormPanel.jsx, /app/frontend/src/components/BillPreview.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added multi-payment support. Data model now stores amounts.payments = [{id, label, date, amount}]. FormPanel 'Payments Received' section has Total Bill input plus Add Payment button (auto-labels Part 1, Part 2). Bill preview shows a PAYMENTS RECEIVED table with #, Description, Date, Amount columns and a Total Received row. Amount Paid = sum of payments (auto)."
+
+  - task: "PDF/Print single A4 page auto-fit + Direct Print button"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/Header.jsx, /app/frontend/src/App.css"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User asked the bill to always fit on ONE A4 page for Download PDF. Implemented generateFittedPdf() that scales the html2canvas capture to fit within (210mm - 12mm) x (297mm - 12mm), centered."
+      - working: "NA"
+        agent: "main"
+        comment: "User asked for a DIRECT Print button that uses the browser print dialog (not going through PDF generation first). New printBill() computes an auto scale factor so the #bill-preview fits ONE A4 page: reads bounding box, compares against A4 usable area (194mm x 281mm at 96dpi), sets a CSS custom property --print-scale on the element, then calls window.print(). App.css @media print applies `transform: scale(var(--print-scale, 1))` with origin top-left, fixed width 900px, absolute positioning left:0 top:0, so the bill renders at exactly the scale needed to fit on one page. After printing, the CSS variable is removed. Download PDF button still generates a fitted PDF via jsPDF."
+
+test_plan:
+  current_focus:
+    - "PDF/Print single A4 page auto-fit"
+    - "Multi-part Payments (Part 1, Part 2, Advance)"
+    - "PDF export alignment (Bank Details, Terms & Notes headers, and status badges)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Please verify three frontend fixes on the deployed React app (no backend involved). The app is at the URL exposed by REACT_APP_BACKEND_URL of the frontend (visit "/"), but you can also test at http://localhost:3000 inside the container.
+
+      TEST 1 — PDF alignment (task: PDF export alignment):
+        a) Reload the app (clear localStorage first).
+        b) In the left form scroll to "Payments Received" section. Set Total Bill Amount = 150000. Click "Add payment" twice. Fill Part 1 amount = 60000 and Part 2 amount = 40000.
+        c) Click the "Download PDF" button in the top-right of the header. Save the downloaded JDB-Bill.pdf. Use pdftoppm to convert page 1 to JPEG (pdftoppm -jpeg -r 120 JDB-Bill.pdf out) and view the image.
+        d) Verify visually in the PDF page image:
+           - The three amount cards (Total Bill / Amount Paid / Balance Due) each show the icon, label, and a small pill badge (UNPAID / PAID / DUE) ADJACENT to the label with only a small gap — NOT floating on the far right of the card.
+           - The BANK DETAILS FOR PAYMENT, TERMS & NOTES, and PAYMENTS RECEIVED dark pill headers are shrink-wrapped to their text content (roughly 130-190px wide), not stretched to full column width.
+           - The B I L L header bar has the status pill (UNPAID/PARTIAL/PAID) vertically centered on the right.
+           - The whole bill fits on ONE A4 page with no overflow to page 2.
+           - The seal image appears centered above the "Authorised Signatory" text, tilted slightly.
+
+      TEST 2 — Direct Print button (task: PDF/Print single A4 page auto-fit + Direct Print button):
+        a) With the same test data as above, click the "Print" button (NOT Download PDF).
+        b) Confirm this triggers the native browser print dialog directly (not opening a PDF in a new tab first).
+        c) Because Playwright can inspect the print media programmatically, use `page.emulate_media(media="print")` and then screenshot the whole page — this simulates what the printer would render.
+        d) Verify that in print media:
+           - Only the #bill-preview element is visible (the form panel and header are hidden).
+           - The bill scales to fit A4 (should not overflow beyond 297mm/1123px at 96dpi).
+           - Layout matches the on-screen preview.
+
+      TEST 3 — Multi-part payments display (task: Multi-part Payments):
+        a) With payments Part 1 = 60000 and Part 2 = 40000, verify the on-screen bill preview shows a "PAYMENTS RECEIVED" table with two rows for Part 1 and Part 2, and a "Total Received ₹ 1,00,000" footer.
+        b) Confirm Amount Paid card shows ₹1,00,000 and Balance Due shows ₹50,000, and status pill shows PARTIAL.
+
+      Please report per-task: PASS/FAIL with specific offsets or misalignments if any element is out of place.
+      Focus on the visual PDF output and on-screen preview only; there is NO backend.
