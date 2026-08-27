@@ -152,24 +152,24 @@ export default function BillPreview({ data }) {
               <tr className="bg-slate-100 text-slate-700 text-[11px] uppercase tracking-wide">
                 <th className="px-3 py-2 border border-slate-300 text-left w-10">#</th>
                 <th className="px-3 py-2 border border-slate-300 text-left">Description</th>
-                <th className="px-3 py-2 border border-slate-300 text-left w-32">Date</th>
+                <th className="px-3 py-2 border border-slate-300 text-left w-28">Date</th>
                 <th className="px-3 py-2 border border-slate-300 text-right w-32">Amount (₹)</th>
               </tr>
             </thead>
             <tbody>
               {payments.map((p, i) => (
-                <tr key={p.id || i} className="text-slate-800">
-                  <td className="px-3 py-2 border border-slate-300">{i + 1}</td>
+                <tr key={p.id || i} className="text-slate-800 odd:bg-white even:bg-slate-50/50">
+                  <td className="px-3 py-2 border border-slate-300 text-slate-600">{i + 1}</td>
                   <td className="px-3 py-2 border border-slate-300 font-medium">{p.label || `Part ${i + 1}`}</td>
-                  <td className="px-3 py-2 border border-slate-300">{formatDate(p.date)}</td>
-                  <td className="px-3 py-2 border border-slate-300 text-right font-semibold">{fmtInr(p.amount)}</td>
+                  <td className="px-3 py-2 border border-slate-300 text-slate-700">{formatDate(p.date)}</td>
+                  <td className="px-3 py-2 border border-slate-300 text-right font-semibold tabular-nums">{fmtInr(p.amount)}</td>
                 </tr>
               ))}
               <tr className="bg-emerald-50 font-bold">
-                <td colSpan={3} className="px-3 py-2 border border-slate-300 text-right text-slate-700">
+                <td colSpan={3} className="px-3 py-2 border border-slate-300 text-right text-slate-700 uppercase tracking-wide text-xs">
                   Total Received
                 </td>
-                <td className="px-3 py-2 border border-slate-300 text-right text-emerald-700">₹ {fmtInr(paid)}</td>
+                <td className="px-3 py-2 border border-slate-300 text-right text-emerald-700 tabular-nums">₹ {fmtInr(paid)}</td>
               </tr>
             </tbody>
           </table>
@@ -188,7 +188,7 @@ export default function BillPreview({ data }) {
                   UNPAID
                 </span>
               </div>
-              <div className="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">₹ {fmtInr(total)}</div>
+              <div className="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">₹ {fmtInr(total)}</div>
             </div>
             <div className="p-5 bg-emerald-50">
               <div className="flex items-center gap-2 flex-wrap leading-none">
@@ -198,7 +198,7 @@ export default function BillPreview({ data }) {
                   PAID
                 </span>
               </div>
-              <div className="mt-3 text-2xl font-extrabold text-emerald-700 tracking-tight">₹ {fmtInr(paid)}</div>
+              <div className="mt-3 text-2xl font-extrabold text-emerald-700 tracking-tight tabular-nums">₹ {fmtInr(paid)}</div>
             </div>
             <div className="p-5 bg-amber-50">
               <div className="flex items-center gap-2 flex-wrap leading-none">
@@ -208,7 +208,7 @@ export default function BillPreview({ data }) {
                   DUE
                 </span>
               </div>
-              <div className="mt-3 text-2xl font-extrabold text-rose-700 tracking-tight">₹ {fmtInr(balance)}</div>
+              <div className="mt-3 text-2xl font-extrabold text-rose-700 tracking-tight tabular-nums">₹ {fmtInr(balance)}</div>
             </div>
           </div>
         </div>
@@ -282,8 +282,9 @@ export default function BillPreview({ data }) {
       {/* Signatures */}
       <div className="grid grid-cols-2 px-8 pt-24 pb-10 gap-10 relative">
         <div className="flex flex-col justify-end">
-          <div className="border-t border-slate-400 pt-1.5 text-xs text-slate-700 text-center">
-            {data.notes.signatureLabel}
+          <div className="border-t border-slate-400 pt-1.5 text-center">
+            <div className="text-xs text-slate-700">{data.notes.signatureLabel}</div>
+            <div className="text-[10px] text-slate-500 mt-1">Received in good condition</div>
           </div>
         </div>
         <div className="relative flex flex-col justify-end">

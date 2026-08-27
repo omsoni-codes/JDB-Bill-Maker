@@ -213,7 +213,7 @@ export default function FormPanel({ data, setData }) {
         </div>
       </Section>
 
-      <Section title="Bank Account (where payment is received)">
+      <Section title="Bank Account">
         <Field label="Account Holder Name">
           <Input value={data.bank.holder} onChange={(e) => update("bank", "holder", e.target.value)} />
         </Field>
