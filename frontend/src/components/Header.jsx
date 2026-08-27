@@ -4,10 +4,23 @@ import { Button } from "./ui/button";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+// Compute the current payment status from totals
+function computeStatus(totalBill, amountPaid, balance) {
+  if (totalBill > 0 && balance <= 0) return "PAID";
+  if (amountPaid > 0 && balance > 0) return "PARTIAL";
+  return "UNPAID";
+}
+
+const STATUS_COLORS = {
+  PAID: "bg-emerald-600",
+  PARTIAL: "bg-amber-500",
+  UNPAID: "bg-rose-600",
+};
+
 export default function Header({ totalBill, amountPaid, balance, onReset }) {
   const fmt = (n) => `\u20B9${Number(n || 0).toLocaleString("en-IN")}`;
-  const status = balance <= 0 && totalBill > 0 ? "PAID" : balance > 0 && amountPaid > 0 ? "PARTIAL" : "UNPAID";
-  const statusColor = status === "PAID" ? "bg-emerald-600" : status === "PARTIAL" ? "bg-amber-500" : "bg-rose-600";
+  const status = computeStatus(totalBill, amountPaid, balance);
+  const statusColor = STATUS_COLORS[status];
 
   const generateFittedPdf = async () => {
     const el = document.getElementById("bill-preview");

@@ -22,11 +22,16 @@ export default function BillPreview({ data }) {
   const payments = Array.isArray(data.amounts.payments) ? data.amounts.payments : [];
   const paid = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const balance = Math.max(total - paid, 0);
-  const isPaid = balance <= 0 && total > 0;
-  const isPartial = paid > 0 && balance > 0;
 
-  const statusLabel = isPaid ? "PAID" : isPartial ? "PARTIAL" : "UNPAID";
-  const statusColor = isPaid ? "bg-emerald-600" : isPartial ? "bg-amber-500" : "bg-rose-600";
+  let statusLabel = "UNPAID";
+  let statusColor = "bg-rose-600";
+  if (total > 0 && balance <= 0) {
+    statusLabel = "PAID";
+    statusColor = "bg-emerald-600";
+  } else if (paid > 0 && balance > 0) {
+    statusLabel = "PARTIAL";
+    statusColor = "bg-amber-500";
+  }
 
   const notesList = (data.notes.lines || "").split("\n").filter((l) => l.trim().length);
 
@@ -273,7 +278,7 @@ export default function BillPreview({ data }) {
           </div>
           <ul className="mt-3 list-disc pl-5 text-xs text-slate-700 space-y-1 leading-relaxed">
             {notesList.map((line, i) => (
-              <li key={i}>{line}</li>
+              <li key={`note-${i}-${line.slice(0, 20)}`}>{line}</li>
             ))}
           </ul>
         </div>

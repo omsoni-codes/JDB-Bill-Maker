@@ -15,7 +15,7 @@ export default function BillMaker() {
     const paid = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
     const balance = Math.max(total - paid, 0);
     return { total, paid, balance };
-  }, [data]);
+  }, [data.amounts.totalBillAmount, data.amounts.payments]);
 
   const onReset = () => {
     if (window.confirm("Reset the entire bill to defaults?")) setData(defaultData);

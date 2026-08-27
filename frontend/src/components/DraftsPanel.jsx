@@ -7,6 +7,10 @@ import { nextBillNumber } from "../utils/billNumber";
 
 const STORAGE_KEY = "jdb_drafts_v1";
 
+// NOTE: Drafts are stored in localStorage because this is a client-only app.
+// The data (bill numbers, party names, bank details entered by the shop owner
+// on their own device) is not sensitive user credentials or auth tokens.
+// If multi-user auth is added later, drafts should be persisted server-side.
 function readDrafts() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");

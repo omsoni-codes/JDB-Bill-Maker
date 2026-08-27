@@ -129,6 +129,18 @@ frontend:
         agent: "main"
         comment: "Third fix: Simplified amount card row to `flex items-center gap-2 flex-wrap leading-none` — icon, label, and badge now flow naturally with small gap; no ml-auto or justify-between. Added `whitespace-nowrap` on badges so tracking never wraps. Section pill labels wrapped in `<div>` block with pill as `<span className='inline-block'>` + leading-none for shrink-wrap width. Downloaded a real PDF via Playwright and rendered it via pdftoppm; visually confirmed on the rasterized PDF page: badges are adjacent to labels, pills are compact (~180px wide), everything fits on one A4 page, seal centered above signatory line."
 
+  - task: "Code quality fixes (hook deps, list keys, status helper, localStorage note)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/BillMaker.jsx, /app/frontend/src/components/BillPreview.jsx, /app/frontend/src/components/Header.jsx, /app/frontend/src/components/DraftsPanel.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Applied code-review recommended fixes: (1) BillMaker useMemo dependency changed from [data] to explicit [data.amounts.totalBillAmount, data.amounts.payments]. (2) BillPreview notes list key changed from `key={i}` to a stable composite key. (3) Header nested ternary for status/statusColor extracted into computeStatus() helper and STATUS_COLORS map. (4) BillPreview status computation converted from nested ternary to explicit if/else. (5) DraftsPanel STORAGE_KEY block carries an explanatory comment about why localStorage is acceptable here (non-sensitive user-generated data). All refactors preserve behavior; on-screen preview still renders correctly."
+
   - task: "Multi-part Payments (Part 1, Part 2, Advance)"
     implemented: true
     working: "NA"
@@ -158,9 +170,10 @@ frontend:
 
 test_plan:
   current_focus:
-    - "PDF/Print single A4 page auto-fit"
-    - "Multi-part Payments (Part 1, Part 2, Advance)"
+    - "Code quality fixes (hook deps, list keys, status helper, localStorage note)"
+    - "PDF/Print single A4 page auto-fit + Direct Print button"
     - "PDF export alignment (Bank Details, Terms & Notes headers, and status badges)"
+    - "Multi-part Payments (Part 1, Part 2, Advance)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
