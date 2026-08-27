@@ -1,0 +1,6 @@
+backend/
+tests/
+scripts/
+test_result.md
+.emergent/
+*.log
