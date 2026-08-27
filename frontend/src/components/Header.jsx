@@ -1,11 +1,47 @@
 import React from "react";
-import { Zap, Printer, RotateCcw } from "lucide-react";
+import { Zap, Printer, RotateCcw, Download } from "lucide-react";
 import { Button } from "./ui/button";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export default function Header({ totalBill, amountPaid, balance, onReset }) {
   const fmt = (n) => `\u20B9${Number(n || 0).toLocaleString("en-IN")}`;
   const status = balance <= 0 && totalBill > 0 ? "PAID" : balance > 0 && amountPaid > 0 ? "PARTIAL" : "UNPAID";
   const statusColor = status === "PAID" ? "bg-emerald-600" : status === "PARTIAL" ? "bg-amber-500" : "bg-rose-600";
+
+  const downloadPdf = async () => {
+    const el = document.getElementById("bill-preview");
+    if (!el) return;
+    const canvas = await html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+    });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if (imgH <= pageH) {
+      pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
+    } else {
+      // multi-page
+      let position = 0;
+      let heightLeft = imgH;
+      while (heightLeft > 0) {
+        pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH);
+        heightLeft -= pageH;
+        if (heightLeft > 0) {
+          pdf.addPage();
+          position -= pageH;
+        }
+      }
+    }
+    pdf.save("JDB-Bill.pdf");
+  };
 
   return (
     <div className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm print:hidden">
@@ -23,8 +59,11 @@ export default function Header({ totalBill, amountPaid, balance, onReset }) {
           <Button variant="outline" size="sm" onClick={onReset}>
             <RotateCcw className="w-4 h-4 mr-1" /> Reset
           </Button>
-          <Button size="sm" onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800">
-            <Printer className="w-4 h-4 mr-1" /> Print / PDF
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="w-4 h-4 mr-1" /> Print
+          </Button>
+          <Button size="sm" onClick={downloadPdf} className="bg-slate-900 hover:bg-slate-800">
+            <Download className="w-4 h-4 mr-1" /> Download PDF
           </Button>
         </div>
       </div>
