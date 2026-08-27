@@ -2,6 +2,8 @@ import React, { useState, useMemo } from "react";
 import Header from "../components/Header";
 import FormPanel from "../components/FormPanel";
 import BillPreview from "../components/BillPreview";
+import DraftsPanel from "../components/DraftsPanel";
+import { Toaster } from "../components/ui/toaster";
 import { defaultData } from "../data/mock";
 
 export default function BillMaker() {
@@ -22,13 +24,15 @@ export default function BillMaker() {
     <div className="min-h-screen bg-gradient-to-br from-amber-50/40 via-slate-100 to-slate-200">
       <Header totalBill={totals.total} amountPaid={totals.paid} balance={totals.balance} onReset={onReset} />
       <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 p-6 print:block print:p-0 max-w-[1600px] mx-auto">
-        <div className="print:hidden">
+        <div className="print:hidden space-y-4">
+          <DraftsPanel data={data} setData={setData} />
           <FormPanel data={data} setData={setData} />
         </div>
         <div>
           <BillPreview data={data} />
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }
