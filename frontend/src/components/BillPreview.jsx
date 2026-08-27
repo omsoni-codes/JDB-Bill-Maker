@@ -32,14 +32,14 @@ export default function BillPreview({ data }) {
   return (
     <div id="bill-preview" className="bg-white shadow-xl rounded-lg mx-auto max-w-[900px] overflow-hidden ring-1 ring-slate-200 print:shadow-none print:max-w-none print:ring-0 print:rounded-none">
       {/* Header/Letterhead */}
-      <div className="bg-gradient-to-b from-amber-100 to-amber-50 border-b-[6px] border-double border-amber-800 px-6 py-5 text-center">
-        <div className="text-sm text-amber-900 font-semibold tracking-wide" style={{ fontFamily: "'Noto Serif Devanagari', serif" }}>
+      <div className="bg-gradient-to-b from-amber-100 to-amber-50 border-b-[6px] border-double border-amber-800 px-6 py-5">
+        <div className="text-center text-sm text-amber-900 font-semibold tracking-wide mb-2" style={{ fontFamily: "'Noto Serif Devanagari', serif" }}>
           {"\u0965 \u091c\u092f \u0926\u0947\u0935 \u092c\u093e\u092c\u093e \u0965"}
         </div>
-        <div className="flex items-center justify-center gap-5 mt-2">
-          <img src={LOGO_URL} alt="JDB Electricals logo" className="w-20 h-20 object-contain drop-shadow-sm" />
-          <div>
-            <h1 className="text-4xl font-extrabold tracking-[0.15em] text-slate-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className="flex items-center gap-5">
+          <img src={LOGO_URL} alt="JDB Electricals logo" className="w-20 h-20 object-contain drop-shadow-sm shrink-0" />
+          <div className="flex-1 text-center">
+            <h1 className="text-4xl font-extrabold tracking-[0.15em] text-slate-900 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
               {data.letterhead.firmName}
             </h1>
             <div className="text-xs text-slate-700 mt-1 italic">{data.letterhead.subLine}</div>
@@ -48,6 +48,7 @@ export default function BillPreview({ data }) {
             </div>
             <div className="text-xs text-slate-700">{data.letterhead.address}</div>
           </div>
+          <div className="w-20 shrink-0" />
         </div>
       </div>
 

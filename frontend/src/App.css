@@ -4,8 +4,37 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Noto+Serif+Devanagari:wght@600&display=swap');
 
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
 @media print {
-  body { background: white !important; }
-  .print\:hidden { display: none !important; }
-  #bill-preview { box-shadow: none !important; }
+  html, body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #bill-preview,
+  #bill-preview * {
+    visibility: visible !important;
+  }
+  #bill-preview {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
 }
