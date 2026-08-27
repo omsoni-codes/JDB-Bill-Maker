@@ -5,9 +5,9 @@ import { Textarea } from "./ui/textarea";
 
 function Section({ title, children }) {
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
-        <h3 className="font-semibold text-slate-800">{title}</h3>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+      <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+        <h3 className="font-semibold text-slate-800 text-sm tracking-wide uppercase">{title}</h3>
       </div>
       <div className="p-4 space-y-3">{children}</div>
     </div>

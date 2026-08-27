@@ -19,9 +19,9 @@ export default function BillMaker() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50/40 via-slate-100 to-slate-200">
       <Header totalBill={totals.total} amountPaid={totals.paid} balance={totals.balance} onReset={onReset} />
-      <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 p-4 print:block print:p-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 p-6 print:block print:p-0 max-w-[1600px] mx-auto">
         <div className="print:hidden">
           <FormPanel data={data} setData={setData} />
         </div>

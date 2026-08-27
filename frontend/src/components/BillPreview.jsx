@@ -1,5 +1,5 @@
 import React from "react";
-import { LOGO_URL } from "../data/mock";
+import { LOGO_URL, SEAL_URL } from "../data/mock";
 import { numberToIndianWords } from "../utils/numberToWords";
 import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 
@@ -30,19 +30,19 @@ export default function BillPreview({ data }) {
   const notesList = (data.notes.lines || "").split("\n").filter((l) => l.trim().length);
 
   return (
-    <div id="bill-preview" className="bg-white shadow-lg mx-auto max-w-[900px] print:shadow-none print:max-w-none">
+    <div id="bill-preview" className="bg-white shadow-xl rounded-lg mx-auto max-w-[900px] overflow-hidden ring-1 ring-slate-200 print:shadow-none print:max-w-none print:ring-0 print:rounded-none">
       {/* Header/Letterhead */}
-      <div className="bg-amber-50 border-b-4 border-amber-800 px-6 py-4 text-center">
+      <div className="bg-gradient-to-b from-amber-100 to-amber-50 border-b-[6px] border-double border-amber-800 px-6 py-5 text-center">
         <div className="text-sm text-amber-900 font-semibold tracking-wide" style={{ fontFamily: "'Noto Serif Devanagari', serif" }}>
           {"\u0965 \u091c\u092f \u0926\u0947\u0935 \u092c\u093e\u092c\u093e \u0965"}
         </div>
-        <div className="flex items-center justify-center gap-4 mt-1">
-          <img src={LOGO_URL} alt="JDB Electricals logo" className="w-16 h-16 object-contain" />
+        <div className="flex items-center justify-center gap-5 mt-2">
+          <img src={LOGO_URL} alt="JDB Electricals logo" className="w-20 h-20 object-contain drop-shadow-sm" />
           <div>
-            <h1 className="text-3xl font-extrabold tracking-wider text-slate-900" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-4xl font-extrabold tracking-[0.15em] text-slate-900" style={{ fontFamily: "'Playfair Display', serif" }}>
               {data.letterhead.firmName}
             </h1>
-            <div className="text-xs text-slate-700 mt-1">{data.letterhead.subLine}</div>
+            <div className="text-xs text-slate-700 mt-1 italic">{data.letterhead.subLine}</div>
             <div className="text-sm font-semibold text-slate-800 mt-1">
               {data.letterhead.proprietor} — {data.letterhead.designation}
             </div>
@@ -70,9 +70,9 @@ export default function BillPreview({ data }) {
       </table>
 
       {/* BILL heading */}
-      <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2">
+      <div className="flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 text-white px-5 py-2.5">
         <div className="tracking-[0.6em] font-bold text-lg">B I L L</div>
-        <div className={`px-3 py-1 rounded text-xs font-bold ${statusColor}`}>{statusLabel}</div>
+        <div className={`px-3 py-1 rounded-full text-xs font-bold ${statusColor} shadow-md`}>{statusLabel}</div>
       </div>
 
       {/* Party + Bill No */}
@@ -99,43 +99,37 @@ export default function BillPreview({ data }) {
       )}
 
       {/* Amount Summary (replaces items) */}
-      <div className="px-4 py-5">
-        <table className="w-full text-sm border border-slate-300 border-collapse">
-          <tbody>
-            <tr className="border-b border-slate-300">
-              <td className="px-4 py-3 font-semibold bg-slate-50 border-r border-slate-300 w-[55%]">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-rose-600" />
-                  <span>Total Bill Amount</span>
-                  <span className="ml-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">UNPAID</span>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-right font-semibold text-slate-900">₹ {fmtInr(total)}</td>
-            </tr>
-            <tr className="border-b border-slate-300">
-              <td className="px-4 py-3 font-semibold bg-slate-50 border-r border-slate-300">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <span>Amount Paid</span>
-                  <span className="ml-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">PAID</span>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-right font-semibold text-emerald-700">₹ {fmtInr(paid)}</td>
-            </tr>
-            <tr className="bg-amber-50">
-              <td className="px-4 py-3 font-bold border-r border-slate-300">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-amber-600" />
-                  <span>Balance Due</span>
-                  <span className="ml-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-800">DUE</span>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-right font-extrabold text-lg text-rose-700">₹ {fmtInr(balance)}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="px-6 py-6">
+        <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="grid grid-cols-3 divide-x divide-slate-200">
+            <div className="p-5 bg-gradient-to-br from-rose-50 to-white">
+              <div className="flex items-center gap-2 text-slate-600 text-xs uppercase tracking-wider font-semibold">
+                <AlertCircle className="w-4 h-4 text-rose-600" />
+                Total Bill
+                <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200">UNPAID</span>
+              </div>
+              <div className="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">₹ {fmtInr(total)}</div>
+            </div>
+            <div className="p-5 bg-gradient-to-br from-emerald-50 to-white">
+              <div className="flex items-center gap-2 text-slate-600 text-xs uppercase tracking-wider font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                Amount Paid
+                <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">PAID</span>
+              </div>
+              <div className="mt-3 text-2xl font-extrabold text-emerald-700 tracking-tight">₹ {fmtInr(paid)}</div>
+            </div>
+            <div className="p-5 bg-gradient-to-br from-amber-50 to-white">
+              <div className="flex items-center gap-2 text-slate-600 text-xs uppercase tracking-wider font-semibold">
+                <Clock className="w-4 h-4 text-amber-600" />
+                Balance Due
+                <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-200 text-amber-800 border border-amber-300">DUE</span>
+              </div>
+              <div className="mt-3 text-2xl font-extrabold text-rose-700 tracking-tight">₹ {fmtInr(balance)}</div>
+            </div>
+          </div>
+        </div>
 
-        <div className="mt-3 text-sm">
+        <div className="mt-4 text-sm text-slate-700">
           <span className="font-semibold">Balance in words: </span>
           <span className="italic">{numberToIndianWords(balance)}</span>
         </div>
@@ -168,11 +162,17 @@ export default function BillPreview({ data }) {
       </div>
 
       {/* Signatures */}
-      <div className="grid grid-cols-2 px-4 pt-16 pb-6 gap-8">
+      <div className="grid grid-cols-2 px-6 pt-20 pb-8 gap-8 relative">
         <div>
           <div className="border-t border-slate-400 pt-1 text-xs text-slate-700">{data.notes.signatureLabel}</div>
         </div>
-        <div className="text-right">
+        <div className="text-right relative">
+          <img
+            src={SEAL_URL}
+            alt="JDB Electricals Seal"
+            className="absolute -top-16 right-16 w-32 h-32 object-contain opacity-80 pointer-events-none select-none"
+            style={{ transform: "rotate(-12deg)" }}
+          />
           <div className="border-t border-slate-400 pt-1 text-xs text-slate-700">Authorised Signatory</div>
           <div className="text-xs mt-1">For <span className="font-bold">{data.notes.companyName}</span></div>
           <div className="text-[10px] text-slate-600">{data.letterhead.subLine.split("\u2022")[0].trim()}</div>
