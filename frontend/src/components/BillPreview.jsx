@@ -71,9 +71,9 @@ export default function BillPreview({ data }) {
       </table>
 
       {/* BILL heading */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 text-white px-5 py-2.5">
+      <div className="relative flex items-center justify-center bg-gradient-to-r from-slate-900 to-slate-800 text-white px-5 py-2.5">
         <div className="tracking-[0.6em] font-bold text-lg">B I L L</div>
-        <div className={`px-3 py-1 rounded-full text-xs font-bold ${statusColor} shadow-md`}>{statusLabel}</div>
+        <div className={`absolute right-4 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full text-xs font-bold ${statusColor} shadow-md`}>{statusLabel}</div>
       </div>
 
       {/* Party + Bill No */}
